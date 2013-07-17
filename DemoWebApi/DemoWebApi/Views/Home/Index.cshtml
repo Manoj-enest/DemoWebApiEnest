@@ -1,0 +1,117 @@
+﻿<div id="body">
+    <section class="featured">
+        <div class="content-wrapper">
+            <hgroup class="title">
+                <h1>Welcome to eNest Demo Web API!</h1>
+            </hgroup>
+        </div>
+    </section>
+
+    <section class="content-wrapper main-content clear-fix">
+        <h3>Please follow the steps given below :</h3>
+        <ol class="round">
+            <li class="one">
+                <h5>Select Method</h5>
+                <select data-bind="options: availableRequestTypes, optionsText: 'requestName', value: selectedRequest, optionsCaption: 'Choose a request type'"></select>
+            </li>
+            <li class="two">
+                <h5>Enter the Credentials</h5>
+                <h6 class="resetMargins">Enter Username(Enest)</h6>
+                <input type="text" data-bind="value: username" />
+                <h6 class="resetMargins">Enter Password(DemoApp)</h6>
+                <input type="text" data-bind="value: password" />
+            </li>
+            <li class="three">
+                <h5>Enter the Url</h5>
+                <input type="text" data-bind="value: url" /><input type="button" style="margin-left: 10px" value="Make a request to API" data-bind="    click: CallAPI" />
+            </li>
+        </ol>
+        <div style="margin: 0 auto">
+            <div id="CallStatus" class="hideMe">
+                Status Code :<span data-bind="text: statusCode"></span>
+                <br />
+                status Text :<span data-bind="text: statusText"></span>
+                <br />
+                Body : 
+                <br />
+                <textarea id="Result" style="width: 50%; height: 50px" data-bind="text: apiResponse"></textarea>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        ko.applyBindings(viewModel);
+    });
+
+    var RequestTypes = function (id, typeName) {
+        this.requestId = id;
+        this.requestName = typeName;
+    };
+
+    var viewModel = {
+        availableRequestTypes: ko.observableArray([
+            new RequestTypes(1, 'GET'),
+            new RequestTypes(2, 'POST'),
+            new RequestTypes(3, 'PUT'),
+            new RequestTypes(4, 'DELETE')
+        ]),
+        selectedRequest: ko.observable(),
+        url: ko.observable(),
+        username: ko.observable(),
+        password: ko.observable(),
+        statusCode: ko.observable(),
+        statusText: ko.observable(),
+        apiResponse: ko.observable(),
+        CallAPI: function (data) {
+            if (this.selectedRequest() == undefined || this.selectedRequest().requestName == undefined) {
+                alert('Please choose a request type');
+                return;
+            }
+            else if (this.username() == '' || this.username() == undefined) {
+                alert('Please enter a username to call...');
+                return;
+            }
+            else if (this.password() == '' || this.password() == undefined) {
+                alert('Please enter a password to call...');
+                return;
+            }
+            else if (this.url() == '' || this.url() == undefined) {
+                alert('Please enter a url to call...');
+                return;
+            }
+            var $this = this;
+            MakeAjaxRequest(this.selectedRequest().requestName, this.username(), this.password(), this.url());
+        }
+    };
+
+    function MakeAjaxRequest(request, username, password, url) {
+
+        $.ajax({
+            type: request,
+            beforeSend: function (request) {
+                request.setRequestHeader("Username", username);
+                request.setRequestHeader("Password", password);
+            },
+            url: url,
+            success: function (data) {
+                viewModel.apiResponse(JSON.stringify(data));
+                $("#CallStatus").removeClass("hideMe");
+                $("#CallStatus").removeClass("errorResponse");
+                $("#CallStatus").addClass("successResponse");
+                viewModel.statusCode(200);
+                viewModel.statusText('Success');
+            },
+        }).fail(function (data) {
+            viewModel.apiResponse('');
+            $("#CallStatus").removeClass("hideMe");
+            $("#CallStatus").removeClass("successResponse");
+            $("#CallStatus").addClass("errorResponse");
+            viewModel.statusCode(data.status);
+            viewModel.statusText(data.statusText);
+        })
+    }
+    $(".Request").show();
+</script>
