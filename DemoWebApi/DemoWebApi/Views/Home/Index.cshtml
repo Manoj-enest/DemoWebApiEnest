@@ -22,7 +22,7 @@
                 <input type="text" data-bind="value: password" />
             </li>
             <li class="three">
-                <h5>Enter the Url</h5>
+                <h5>Enter the Url(eg. http://localhost:1073/api/Test) </h5>
                 <input type="text" data-bind="value: url" /><input type="button" style="margin-left: 10px" value="Make a request to API" data-bind="    click: CallAPI" />
             </li>
         </ol>
@@ -96,16 +96,16 @@
                 request.setRequestHeader("Password", password);
             },
             url: url,
-            success: function (data) {
-                viewModel.apiResponse(JSON.stringify(data));
+            success: function (data, textStatus, jqXHR) {
+                viewModel.apiResponse(JSON.stringify(jqXHR.responseText));
                 $("#CallStatus").removeClass("hideMe");
                 $("#CallStatus").removeClass("errorResponse");
                 $("#CallStatus").addClass("successResponse");
                 viewModel.statusCode(200);
                 viewModel.statusText('Success');
             },
-        }).fail(function (data) {
-            viewModel.apiResponse('');
+        }).fail(function (data, textStatus, jqXHR) {
+            viewModel.apiResponse(JSON.stringify(jqXHR.responseText));
             $("#CallStatus").removeClass("hideMe");
             $("#CallStatus").removeClass("successResponse");
             $("#CallStatus").addClass("errorResponse");
